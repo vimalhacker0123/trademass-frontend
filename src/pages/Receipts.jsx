@@ -29,8 +29,11 @@ const duration = saved.duration || pick(b, ["duration", "courseDuration"]) || "3
     const totalFromSaved = Number(saved.total || saved.amount || 0);
     const paidFromSaved = saved.paidAmount !== undefined ? Number(saved.paidAmount) : undefined;
     const paidFromBackend = Number(pick(b, ["paidAmount", "paid", "amountPaid", "collected"]) || 0);
-    const paid = paidFromSaved !== undefined ? paidFromSaved : paidFromBackend;
-
+// Backend PAID nu sonna, full amount paid nu artham
+let paid = paidFromSaved !== undefined ? paidFromSaved : paidFromBackend;
+if (b.status === "PAID") {
+  paid = totalFromSaved > 0 ? totalFromSaved : amountFromBackend;
+}
     let total = totalFromSaved > 0 ? totalFromSaved : amountFromBackend;
     if (total === 0 && paid > 0) total = paid; // Idhu dhaan mukkiyam
 
