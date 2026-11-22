@@ -11,17 +11,33 @@ import Payments from "./pages/Payments";
 import Receipts from "./pages/Receipts";
 import Reports from "./pages/Reports";
 
-// ===== 1. LOGIN PROTECTION - Idhu dhaan mukkiyam =====
+// ===== 1. LOGIN PROTECTION =====
 function ProtectedRoute() {
   const token = localStorage.getItem("token");
-  // Token illa na Login ku thallidum
+  const location = useLocation();
   if (!token) {
-    return <Navigate to="/login" replace />;
+    // Enga irundhu vandhom nu nyabagam vechu, login mudinjadhum anga anuppa
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
   return <Outlet />;
 }
 
-// ===== 2. PAGE MAARUM BODHU MELA SCROLL AAGANUM =====
+// ===== 2. LOGIN PAGE LA IRUKKUMBODHU ALREADY LOGIN PANNI IRUNDHA DASHBOARD KU POGANUM =====
+function PublicRoute() {
+  const token = localStorage.getItem("token");
+  if (token) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <Outlet />;
+}
+
+// ===== 3. HOME ROUTE - "/" =====
+function HomeRedirect() {
+  const token = localStorage.getItem("token");
+  // Token irundha dashboard, illana login
+  return <Navigate to={token ? "/dashboard" : "/login"} replace />;
+}
+
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -45,13 +61,13 @@ function Layout() {
   );
 }
 
-// ===== 3. 404 PAGE - Thappana URL potta =====
 function NotFound() {
+  const token = localStorage.getItem("token");
   return (
     <div style={{ textAlign: "center", padding: "80px 20px" }}>
       <h1 style={{ fontSize: 60, margin: 0, color: "#0a2a6b" }}>404</h1>
       <p style={{ fontSize: 18 }}>Page not found 😕</p>
-      <a href="/dashboard" style={{ color: "#0a2a6b", fontWeight: "bold" }}>← Back to Dashboard</a>
+      <a href={token ? "/dashboard" : "/login"} style={{ color: "#0a2a6b", fontWeight: "bold" }}>← Back to Home</a>
     </div>
   );
 }
@@ -61,10 +77,14 @@ function App() {
     <BrowserRouter>
       <ScrollToTop />
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<HomeRedirect />} />
 
-        {/* Login panna mattum ulla poga mudiyum - Protected */}
+        {/* Login pannadhavangalukku mattum */}
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
+        </Route>
+
+        {/* Login pannavangalukku mattum */}
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>
             <Route path="dashboard" element={<Dashboard />} />
@@ -76,7 +96,6 @@ function App() {
           </Route>
         </Route>
 
-        {/* Thappana URL */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

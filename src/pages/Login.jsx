@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL || "https://trademass-backend-java1.onrender.com";
+
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -8,22 +10,38 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) return alert("Email & Password enter pannunga");
 
     setLoading(true);
-    // Demo login - Backend vandha inga api call maathidu
-    setTimeout(() => {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Login failed");
+
+      // Backend la irundhu token varum
+      localStorage.setItem("token", data.token || "trademass-token");
+      localStorage.setItem("user", JSON.stringify(data.user || { name: "Admin", email }));
+      navigate("/dashboard");
+    } catch (err) {
+      // Backend down-a irundha / Demo-ku
       if (email === "admin@trademass.com" && password === "admin123") {
         localStorage.setItem("token", "trademass-token");
         localStorage.setItem("user", JSON.stringify({ name: "Admin", email }));
         navigate("/dashboard");
       } else {
-        alert("❌ Wrong Email / Password\n\nDemo Login:\nEmail: admin@trademass.com\nPassword: admin123");
+        alert("❌ Login Failed: " + err.message + "\n\nDemo Login:\nEmail: admin@trademass.com\nPassword: admin123");
       }
+    } finally {
       setLoading(false);
-    }, 600);
+    }
   };
 
   return (
@@ -47,8 +65,6 @@ function Login() {
             {loading ? "Checking... ⏳" : "Login →"}
           </button>
         </form>
-
-        
 
         <p style={{ textAlign: "center", fontSize: 11, color: "#94a3b8", margin: "14px 0 0" }}>
           Educational purpose only. TradeMass is not a SEBI-registered Adviser.
