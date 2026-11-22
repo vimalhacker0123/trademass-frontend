@@ -5,9 +5,6 @@ import { billApi } from "../services/api";
 function Dashboard() {
   const [bills, setBills] = useState([]);
 
-  const getSaved = () => {
-    try { return JSON.parse(localStorage.getItem("trademass_bill_fix") || "{}"); } catch { return {}; }
-  };
   const pick = (b, keys) => {
     for (const k of keys) {
       if (b[k] !== undefined && b[k] !== null && b[k] !== "") return b[k];
@@ -15,32 +12,19 @@ function Dashboard() {
     return undefined;
   };
 
-  // ===== FIX: Name + Total rendu-um sari pannom =====
+  // NO localStorage - Backend mattum dhaan unmai
   const fixBill = (b) => {
-    const saved = getSaved()[b.id] || {};
-
-    // NAME - Saved la irundha adhu, illana Backend, illana Unknown + ID
-    const name = saved.customerName || pick(b, ["customerName", "name", "studentName", "customer_name", "fullName"]) || `Unknown (ID ${b.id})`;
-    const mobile = saved.mobile || pick(b, ["mobile", "phone", "phoneNumber", "contact"]) || "";
+    const name = pick(b, ["customerName", "name", "studentName", "customer_name", "fullName"]) || `Unknown (ID ${b.id})`;
+    const mobile = pick(b, ["mobile", "phone", "phoneNumber", "contact"]) || "";
     const course = pick(b, ["course", "courseName"]) || "Stock Market Trading";
-
-    // TOTAL FIX: Backend amount 0 nu thara, aana Paid 4,50,000 nu thara
-    // Appo Total = Paid + Balance dhaan correct
-    const amountFromBackend = Number(pick(b, ["amount", "total", "totalAmount", "totalFees", "fees", "billAmount"]) || 0);
-    const totalFromSaved = Number(saved.total || saved.amount || 0);
-    const paidFromSaved = saved.paidAmount !== undefined ? Number(saved.paidAmount) : undefined;
-    const paidFromBackend = Number(pick(b, ["paidAmount", "paid", "amountPaid", "collected"]) || 0);
-    const paid = paidFromSaved !== undefined ? paidFromSaved : paidFromBackend;
-
-    let total = totalFromSaved > 0 ? totalFromSaved : amountFromBackend;
-    // Backend Total 0, Paid 4,50,000 na - Total = Paid dhaan
-    if (total === 0 && paid > 0) total = paid;
-
+    const total = Number(pick(b, ["amount", "total", "totalAmount", "totalFees", "fees", "billAmount"]) || 0);
+    const paid = Number(pick(b, ["paidAmount", "paid", "amountPaid", "collected"]) || 0);
     const balance = Math.max(0, total - paid);
-    const mode = saved.paymentMode || pick(b, ["paymentMode", "mode", "paymentMethod"]) || "-";
+    const mode = pick(b, ["paymentMode", "mode", "paymentMethod"]) || "-";
     const date = pick(b, ["billDate", "date", "paymentDate", "createdAt", "dueDate"]) || "";
-
-    return { ...b, customerName: name, name: name, mobile: mobile, course: course, amount: total, paidAmount: paid, balanceAmount: balance, paymentMode: mode, status: balance <= 0 ? "PAID" : "PENDING", billDate: date };
+    // Backend status PAID na, adhaye edu. Illana balance vachu decide pannu
+    const status = b.status ? String(b.status).toUpperCase() : (balance <= 0 && total > 0 ? "PAID" : "PENDING");
+    return { ...b, customerName: name, name, mobile, course, amount: total, paidAmount: paid, balanceAmount: balance, paymentMode: mode, status, billDate: date };
   };
 
   const load = () => {
@@ -52,23 +36,21 @@ function Dashboard() {
   useEffect(() => { load(); }, []);
 
   const deleteBill = async (id) => {
-    if (!window.confirm(`ID ${id} - Unknown bill-a delete pannalama? Name illaadha bill-a sari panna mudiyaadhu. Pudhusaa create pannanum.`)) return;
-    try {
-      await billApi.delete(id);
-      const all = getSaved(); delete all[id];
-      localStorage.setItem("trademass_bill_fix", JSON.stringify(all));
-      load();
-    } catch (e) { alert(e.message); }
+    if (!window.confirm(`ID ${id} bill-a delete pannalama?`)) return;
+    try { await billApi.delete(id); load(); }
+    catch (e) { alert(e.message); }
   };
 
-  const today = new Date().toISOString().slice(0, 10);
-  // Ippo Total Fees correct-a varum - Amount illa, Paid+Balance la irundhu
+  // DATE FIX: toISOString vendaam, Local Date dhaan
+  const todayStr = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD local
+  const todayDisplay = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+
   const totalFees = bills.reduce((s, b) => s + Number(b.amount || 0), 0);
   const totalCollected = bills.reduce((s, b) => s + Number(b.paidAmount || 0), 0);
   const totalPending = bills.reduce((s, b) => s + Number(b.balanceAmount || 0), 0);
   const paidCount = bills.filter(b => b.status === "PAID").length;
   const pendingList = bills.filter(b => Number(b.balanceAmount || 0) > 0);
-  const todayBills = bills.filter(b => (b.billDate || "").startsWith(today));
+  const todayBills = bills.filter(b => (b.billDate || "").startsWith(todayStr));
   const todayCollected = todayBills.reduce((s, b) => s + Number(b.paidAmount || 0), 0);
   const recentBills = [...bills].slice(-5).reverse();
   const collectionPct = totalFees > 0 ? Math.round((totalCollected / totalFees) * 100) : 0;
@@ -78,7 +60,7 @@ function Dashboard() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
         <div>
           <h2 style={{ color: "#0a2a6b", margin: 0 }}>Dashboard - TradeMass 👋</h2>
-          <p style={{ margin: "5px 0 0", color: "#64748b" }}>Welcome back, Admin! Today: 21 November 2026</p>
+          <p style={{ margin: "5px 0 0", color: "#64748b" }}>Welcome back, Admin! Today: {todayDisplay}</p>
         </div>
         <Link to="/payments" style={{ background: "#0a2a6b", color: "white", padding: "10px 18px", borderRadius: 6, textDecoration: "none", fontWeight: "bold" }}>+ New Payment</Link>
       </div>
@@ -140,11 +122,10 @@ function Dashboard() {
           )}
           {bills.some(b => b.customerName.startsWith("Unknown")) && (
             <p style={{ background: "#fef2f2", padding: 10, borderRadius: 6, fontSize: 13, color: "#991b1b", marginTop: 12 }}>
-              ⚠️ <b>Unknown nu varura bill la Name illa</b> - Backend save pannala. Adha Delete panni Payments la pudhusa create pannunga. Appo dhaan Name varum.
+              ⚠️ <b>Unknown nu varura bill la Name illa</b> - Backend la save aagala. Adha Delete panni Payments la pudhusa create pannunga.
             </p>
           )}
         </div>
-
         <div style={{ flex: "1 1 300px", background: "#fff7ed", border: "1px solid #fed7aa", borderRadius: 10, padding: 16 }}>
           <h3 style={{ margin: "0 0 12px", color: "#991b1b" }}>⏳ Pending - Follow Up</h3>
           {pendingList.length === 0 ? <p style={{ color: "green", fontWeight: "bold" }}>🎉 No pending! Ellaam collected.</p> : pendingList.slice(0, 5).map(b => (

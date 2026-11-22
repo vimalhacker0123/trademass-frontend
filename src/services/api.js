@@ -7,7 +7,6 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" }
 });
 
-// Token irundha automatic-a anuppidum
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -18,7 +17,9 @@ export const billApi = {
   getAll: () => api.get("/api/bills"),
   create: (data) => api.post("/api/bills", data),
   delete: (id) => api.delete(`/api/bills/${id}`),
-  pay: (id) => api.patch(`/api/bills/${id}/pay`),
+  // FIX: update + pay rendu-me data anuppanum
+  update: (id, data) => api.put(`/api/bills/${id}`, data),
+  pay: (id, data) => api.patch(`/api/bills/${id}/pay`, data),
 };
 
 export default api;
