@@ -6,20 +6,12 @@ function Students() {
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({
     customerName: "", mobile: "", district: "",
-    course: "Stock Market Trading",
-    amount: 30000, paidAmount: "",
+    course: "Forex Trading - Gold",
+    amount: 50000, paidAmount: "",
     paymentMode: "UPI - Phone pe",
     paymentDate: new Date().toISOString().slice(0, 10),
   });
 
-  const getSaved = () => {
-    try { return JSON.parse(localStorage.getItem("trademass_bill_fix") || "{}"); } catch { return {}; }
-  };
-  const saveFix = (key, data) => {
-    const all = getSaved();
-    all[key] = data;
-    localStorage.setItem("trademass_bill_fix", JSON.stringify(all));
-  };
   const pick = (b, keys) => {
     for (const k of keys) {
       if (b[k] !== undefined && b[k] !== null && b[k] !== "") return b[k];
@@ -27,28 +19,20 @@ function Students() {
     return undefined;
   };
 
-  // ===== FIX: Payments / Dashboard la irukura adhe fix =====
+  // Backend mattum dhaan unmai - localStorage illa, Data pogadhu
   const fixBill = (b) => {
-    const saved = getSaved()[b.id] || {};
-    const name = saved.customerName || pick(b, ["customerName", "name", "studentName", "customer_name", "fullName"]) || `Unknown (ID ${b.id})`;
-    const mobile = saved.mobile || pick(b, ["mobile", "phone", "phoneNumber", "contact", "customerEmail"]) || "";
-    const district = saved.district || pick(b, ["district", "state", "city", "place"]) || "-";
-    const course = saved.course || pick(b, ["course", "courseName"]) || "Stock Market Trading";
+    const name = pick(b, ["customerName", "name", "studentName", "customer_name", "fullName"]) || `Unknown (ID ${b.id})`;
+    const mobile = pick(b, ["mobile", "phone", "phoneNumber", "contact", "customerEmail"]) || "";
+    const district = pick(b, ["district", "state", "city", "place"]) || "-";
+    const course = pick(b, ["course", "courseName"]) || "Forex Trading - Gold";
 
-    const amountFromBackend = Number(pick(b, ["amount", "total", "totalAmount", "totalFees", "fees", "billAmount"]) || 0);
-    const totalFromSaved = Number(saved.total || saved.amount || 0);
-    const paidFromSaved = saved.paidAmount !== undefined ? Number(saved.paidAmount) : undefined;
-    const paidFromBackend = Number(pick(b, ["paidAmount", "paid", "amountPaid", "collected"]) || 0);
-    const paid = paidFromSaved !== undefined ? paidFromSaved : paidFromBackend;
-
-    let total = totalFromSaved > 0 ? totalFromSaved : amountFromBackend;
-    if (total === 0 && paid > 0) total = paid;
-
+    const total = Number(pick(b, ["amount", "total", "totalAmount", "totalFees", "fees", "billAmount"]) || 0);
+    const paid = Number(pick(b, ["paidAmount", "paid", "amountPaid", "collected"]) || 0);
     const balance = Math.max(0, total - paid);
-    const mode = saved.paymentMode || pick(b, ["paymentMode", "mode", "paymentMethod"]) || "-";
+    const mode = pick(b, ["paymentMode", "mode", "paymentMethod"]) || "-";
     const date = pick(b, ["billDate", "date", "paymentDate", "createdAt", "dueDate"]) || "";
 
-    return { ...b, customerName: name, name: name, mobile: mobile, district: district, course: course, amount: total, paidAmount: paid, balanceAmount: balance, paymentMode: mode, status: balance <= 0 ? "PAID" : "PENDING", billDate: date };
+    return { ...b, customerName: name, name: name, mobile: mobile, district: district, course: course, amount: total, paidAmount: paid, balanceAmount: balance, paymentMode: mode, status: balance <= 0 && total > 0 ? "PAID" : "PENDING", billDate: date };
   };
 
   const load = () => {
@@ -68,36 +52,26 @@ function Students() {
     if (paid > total) return alert(`Paid ₹${paid} Total ₹${total} vida adhigam!`);
     const balance = total - paid;
 
-    // Backend ku ella peru layum anuppurom
     const payload = {
-      customerName: form.customerName, name: form.customerName, studentName: form.customerName,
-      customerEmail: form.mobile, mobile: form.mobile, phone: form.mobile, phoneNumber: form.mobile,
-      district: form.district, state: form.district, course: form.course, courseName: form.course,
-      amount: total, total: total, totalAmount: total, totalFees: total,
-      paidAmount: paid, paid: paid,
-      balanceAmount: balance, balance: balance,
-      paymentMode: form.paymentMode, mode: form.paymentMode,
-      billDate: form.paymentDate, dueDate: form.paymentDate, paymentDate: form.paymentDate,
+      customerName: form.customerName,
+      mobile: form.mobile,
+      district: form.district,
+      course: form.course,
+      amount: total,
+      totalAmount: total,
+      paidAmount: paid,
+      balanceAmount: balance,
+      paymentMode: form.paymentMode,
+      billDate: form.paymentDate,
+      paymentDate: form.paymentDate,
+      dueDate: form.paymentDate,
       status: balance <= 0 ? "PAID" : "PENDING",
     };
     try {
-      const res = await billApi.create(payload);
-      const newId = res?.data?.id;
-      const saveData = { customerName: form.customerName, mobile: form.mobile, district: form.district, course: form.course, total: total, paidAmount: paid, paymentMode: form.paymentMode };
-      if (newId) {
-        saveFix(newId, saveData);
-        setForm({ ...form, customerName: "", mobile: "", district: "", paidAmount: "" });
-        setSearch("");
-        setTimeout(load, 400);
-      } else {
-        setTimeout(async () => {
-          const r = await billApi.getAll();
-          const last = (r.data || []).slice(-1)[0];
-          if (last) saveFix(last.id, saveData);
-          setForm({ ...form, customerName: "", mobile: "", district: "", paidAmount: "" });
-          setSearch(""); load();
-        }, 500);
-      }
+      await billApi.create(payload);
+      setForm({ ...form, customerName: "", mobile: "", district: "", paidAmount: "" });
+      setSearch("");
+      await load();
       alert(`Student Added ✅\n${form.customerName} - ₹${total} | Paid ₹${paid} | Pending ₹${balance}`);
     } catch (err) { alert("Failed: " + err.message); }
   };
@@ -106,8 +80,6 @@ function Students() {
     if (!window.confirm("Delete this student?")) return;
     try {
       await billApi.delete(id);
-      const all = getSaved(); delete all[id];
-      localStorage.setItem("trademass_bill_fix", JSON.stringify(all));
       load();
     } catch (e) { alert(e.message); }
   };
@@ -135,7 +107,10 @@ function Students() {
         <input placeholder="Mobile Number *" value={form.mobile} onChange={e => setForm({ ...form, mobile: e.target.value })} required style={inputStyle} />
         <input placeholder="District / State" value={form.district} onChange={e => setForm({ ...form, district: e.target.value })} style={inputStyle} />
         <select value={form.course} onChange={e => setForm({ ...form, course: e.target.value })} style={inputStyle}>
-          <option>Stock Market Trading</option><option>Options Trading</option><option>Intraday Trading</option><option>Swing Trading</option>
+          <option>Forex Trading - Gold</option>
+          <option>Crypto Trading</option>
+          <option>Gold</option>
+          <option>Third Eye Rules</option>
         </select>
         <input type="date" value={form.paymentDate} onChange={e => setForm({ ...form, paymentDate: e.target.value })} required style={inputStyle} />
         <input type="number" placeholder="Total Fee" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} required style={inputStyle} />
