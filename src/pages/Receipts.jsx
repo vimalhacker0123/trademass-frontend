@@ -17,8 +17,8 @@ function Receipts() {
     const name = pick(b, ["customerName", "name", "studentName", "customer_name", "fullName"]) || `Unknown (ID ${b.id})`;
     const mobile = pick(b, ["mobile", "phone", "phoneNumber", "contact", "customerEmail"]) || "-";
     const district = pick(b, ["district", "state", "city"]) || "-";
-    const course = pick(b, ["course", "courseName", "course_name"]) || "Stock Market Trading";
-    const duration = pick(b, ["duration", "courseDuration"]) || "3 Months";
+    const course = pick(b, ["course", "courseName", "course_name"]) || "Forex Trading - Gold";
+    const duration = pick(b, ["duration", "courseDuration"]) || "7 Days Live online class - 1 Month Practice";
     const total = Number(pick(b, ["amount", "total", "totalAmount", "totalFees", "fees", "billAmount"]) || 0);
     let paid = Number(pick(b, ["paidAmount", "paid", "amountPaid", "collected"]) || 0);
     // Backend PAID nu sonna, full amount paid
@@ -78,10 +78,10 @@ function Receipts() {
               <div style={{ marginTop: 12, fontSize: 13, letterSpacing: 1 }}>Learn &nbsp;|&nbsp; Practice &nbsp;|&nbsp; Grow</div>
             </div>
             <div style={{ flex: 1, background: "#0a2a6b", color: "white", padding: "20px 25px", textAlign: "center" }}>
-              <div style={{ fontSize: 17, fontWeight: "bold" }}>Stock Market Trading</div>
+              <div style={{ fontSize: 17, fontWeight: "bold" }}>{selected.course}</div>
               <div style={{ fontSize: 20, fontWeight: "900", color: "#facc15", margin: "4px 0" }}>Course</div>
               <div style={{ fontSize: 13, fontWeight: "bold" }}>Trade Smart • Grow Wealth</div>
-              <div style={{ fontSize: 11, marginTop: 6 }}>📈 Live Market • Options • Intraday • Swing</div>
+              <div style={{ fontSize: 11, marginTop: 6 }}>📈 Live Market • Forex • Gold • Crypto</div>
             </div>
           </div>
           <div style={{ height: 6, background: "#f59e0b", width: "45%" }}></div>
@@ -130,7 +130,7 @@ function Receipts() {
               </div>
             </div>
 
-            {/* IMPORTANT TERMS & REFUND POLICY - ADDED */}
+            {/* IMPORTANT TERMS & REFUND POLICY */}
             <div style={{ marginTop: 20, padding: "14px 16px", background: "#f8fafc", border: "1px solid #e2e8f0", borderTop: "3px solid #f59e0b", borderRadius: 8, textAlign: "left" }}>
               <div style={{ color: "#0a2a6b", fontWeight: "900", fontSize: 13, marginBottom: 4 }}>IMPORTANT TERMS</div>
               <p style={{ fontSize: 11.5, lineHeight: 1.6, color: "#334155", margin: "0 0 12px 0" }}>

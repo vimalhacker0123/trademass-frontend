@@ -7,7 +7,7 @@ function Payments() {
   const [status, setStatus] = useState("Connecting to backend...");
   const [form, setForm] = useState({
     customerName: "", mobile: "", district: "",
-    course: "Stock Market Trading",
+    course: "Forex Trading - Gold",
     duration: "7 Days Live online class - 1 Month Practice",
     amount: 30000, paidAmount: "",
     paymentMode: "UPI - Phone pe", transactionId: "",
@@ -25,7 +25,7 @@ function Payments() {
   const fixBill = (b) => {
     const name = pick(b, ["customerName", "name", "studentName", "customer_name", "fullName"]) || "";
     const mobile = pick(b, ["mobile", "phone", "phoneNumber", "contact"]) || "";
-    const course = pick(b, ["course", "courseName"]) || "Stock Market Trading";
+    const course = pick(b, ["course", "courseName"]) || "Forex Trading - Gold";
     const total = Number(pick(b, ["amount", "total", "totalAmount", "totalFees", "fees", "billAmount"]) || 0);
     const paid = Number(pick(b, ["paidAmount", "paid", "amountPaid", "collected"]) || 0);
     const balance = Math.max(0, total - paid);
@@ -135,7 +135,10 @@ function Payments() {
         <input placeholder="Mobile *" value={form.mobile} onChange={e => setForm({ ...form, mobile: e.target.value })} required style={inputStyle} />
         <input placeholder="District / State" value={form.district} onChange={e => setForm({ ...form, district: e.target.value })} style={inputStyle} />
         <select value={form.course} onChange={e => setForm({ ...form, course: e.target.value })} style={inputStyle}>
-          <option>Stock Market Trading</option><option>Options Trading</option><option>Intraday Trading</option><option>Swing Trading</option>
+          <option>Forex Trading - Gold</option>
+          <option>Crypto Trading</option>
+          <option>Gold</option>
+          <option>Third Eye Rules</option>
         </select>
         <input type="number" placeholder="Total Fee" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} required style={inputStyle} />
         <input type="number" placeholder="Paid Amount" value={form.paidAmount} onChange={e => setForm({ ...form, paidAmount: e.target.value })} style={inputStyle} />
