@@ -130,6 +130,21 @@ function Receipts() {
               </div>
             </div>
 
+            {/* IMPORTANT TERMS & REFUND POLICY - ADDED */}
+            <div style={{ marginTop: 20, padding: "14px 16px", background: "#f8fafc", border: "1px solid #e2e8f0", borderTop: "3px solid #f59e0b", borderRadius: 8, textAlign: "left" }}>
+              <div style={{ color: "#0a2a6b", fontWeight: "900", fontSize: 13, marginBottom: 4 }}>IMPORTANT TERMS</div>
+              <p style={{ fontSize: 11.5, lineHeight: 1.6, color: "#334155", margin: "0 0 12px 0" }}>
+                Educational purpose only. Trade Mass is not a SEBI-registered Investment Adviser or Research Analyst. No profit or return is guaranteed. Trading involves market risk; students make their own trading decisions. Refunds are governed by the terms disclosed and agreed before payment and applicable law.
+              </p>
+              <div style={{ color: "#0a2a6b", fontWeight: "900", fontSize: 13, marginBottom: 4 }}>REFUND &amp; CANCELLATION POLICY</div>
+              <ol style={{ fontSize: 11.5, lineHeight: 1.6, color: "#334155", margin: 0, paddingLeft: 16 }}>
+                <li>Students can request a refund within the first 2 days from the course commencement date if they are not satisfied with the course.</li>
+                <li>Refund requests made after the initial 2-day period will not be accepted.</li>
+                <li>Once the 2-day refund period is completed, the course fee becomes non-refundable, subject to applicable laws.</li>
+                <li>Students are requested to carefully read and agree to these terms before joining the course.</li>
+              </ol>
+            </div>
+
             <div style={{ marginTop: 18, fontSize: 12, color: "#64748b", textAlign: "center", borderTop: "1px solid #e2e8f0", paddingTop: 10 }}>
               This is a computer generated receipt. • TradeMass Trading & Wealth Academy • For queries contact Admin
             </div>
