@@ -67,15 +67,12 @@ function Receipts() {
       {selected && (
         <div style={{ maxWidth: 800, margin: "0 auto", background: "white", border: "1px solid #e2e8f0", borderRadius: 10, overflow: "hidden" }} id="receipt">
           <div style={{ display: "flex" }}>
-            <div style={{ flex: 1, padding: "20px 25px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontSize: 48, fontWeight: "900", color: "#0a2a6b" }}>T<span style={{ color: "#f59e0b" }}>M</span></span>
-                <div>
-                  <div style={{ fontSize: 32, fontWeight: "900", color: "#0a2a6b", lineHeight: 1 }}>Trade<span style={{ color: "#f59e0b" }}>Mass</span></div>
-                  <div style={{ fontSize: 14, fontWeight: "bold" }}>Trading & Wealth Academy</div>
-                </div>
+            {/* LEFT - LOGO ONLY - TM & Trading & Wealth Academy REMOVED */}
+            <div style={{ flex: 1, padding: "12px 20px", display: "flex", alignItems: "center", gap: 12 }}>
+              <img src="/logo.png" alt="TradeMass Logo" style={{ width: 115, height: 115, objectFit: "cover", borderRadius: "50%", border: "2px solid #f59e0b" }} />
+              <div>
+                <div style={{ fontSize: 13, letterSpacing: 1, fontWeight: "bold", color: "#0a2a6b" }}>Learn &nbsp;|&nbsp; Practice &nbsp;|&nbsp; Grow</div>
               </div>
-              <div style={{ marginTop: 12, fontSize: 13, letterSpacing: 1 }}>Learn &nbsp;|&nbsp; Practice &nbsp;|&nbsp; Grow</div>
             </div>
             <div style={{ flex: 1, background: "#0a2a6b", color: "white", padding: "20px 25px", textAlign: "center" }}>
               <div style={{ fontSize: 17, fontWeight: "bold" }}>{selected.course}</div>
@@ -146,7 +143,7 @@ function Receipts() {
             </div>
 
             <div style={{ marginTop: 18, fontSize: 12, color: "#64748b", textAlign: "center", borderTop: "1px solid #e2e8f0", paddingTop: 10 }}>
-              This is a computer generated receipt. • TradeMass Trading & Wealth Academy • For queries contact Admin
+              This is a computer generated receipt. • TradeMass • For queries contact Admin
             </div>
           </div>
         </div>
