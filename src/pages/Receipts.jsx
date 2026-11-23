@@ -123,9 +123,9 @@ function Receipts() {
                   <div style={{ fontWeight: "900", fontSize: 18 }}>TradeMass</div>
                 </div>
                 <div style={{ marginTop: 15, fontStyle: "italic", fontWeight: "bold", color: "#0a2a6b", fontSize: 13 }}>Keep Learning... Keep Trading...</div>
-                {/* SIGNATURE - BLACK COLOUR, AUTHORISED SIGNATURE KU MELA */}
-                <div style={{ marginTop: 18, height: 70, display: "flex", justifyContent: "center", alignItems: "center", overflow: "hidden" }}>
-                  <img src="/signature.png" alt="Signature" style={{ width: 60, height: 120, objectFit: "contain", filter: "grayscale(1) brightness(0) contrast(1.2)", transform: "rotate(90deg)" }} />
+                {/* SIGNATURE - UPDATED - Blue Signature, No Rotate, No Black Filter */}
+                <div style={{ marginTop: 18, height: 75, display: "flex", justifyContent: "center", alignItems: "flex-end", overflow: "hidden" }}>
+                  <img src="/signature.png" alt="Authorised Signature" style={{ width: 175, height: "auto", maxHeight: 70, objectFit: "contain" }} />
                 </div>
                 <div style={{ borderTop: "1px solid #333", paddingTop: 6, fontSize: 13 }}>Authorised Signature</div>
               </div>
